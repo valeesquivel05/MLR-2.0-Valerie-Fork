@@ -1,0 +1,12 @@
+.sample_CNN_padded_mnist_no_location
+.sample_CNN_padded_mnist_location_old
+.sample_CNN_padded_mnist_bad_concat
+.sample_CNN_padded_mnist_low_epoch
+.data
+.sample_CNN_padded_cifar10
+.sample_CNN_padded_mnist_300epoch
+.sample_CNN_padded_mnist
+.cifar_data
+.output
+.outputFile
+*.png
