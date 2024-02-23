@@ -66,13 +66,13 @@ def load_checkpoint(filepath):
     return vae
 
 #load_checkpoint('output/checkpoint_threeloss_singlegrad200_smfc.pth'.format(modelNumber=modelNumber))
-load_checkpoint('output_emnist_recurr/checkpoint_300.pth'.format(modelNumber=modelNumber)) # MLR2.0 trained on emnist letters, digits, and fashion mnist
+load_checkpoint('output_emnist_recurr/checkpoint_300.pth') # MLR2.0 trained on emnist letters, digits, and fashion mnist
 
 #print('Loading the classifiers')
-clf_shapeS=load('output{num}/ss{num}.joblib'.format(num=modelNumber))
-clf_shapeC=load('output{num}/sc{num}.joblib'.format(num=modelNumber))
-clf_colorC=load('output{num}/cc{num}.joblib'.format(num=modelNumber))
-clf_colorS=load('output{num}/cs{num}.joblib'.format(num=modelNumber))
+clf_shapeS=load('classifier_output/ss.joblib')
+clf_shapeC=load('classifier_output/sc.joblib')
+clf_colorC=load('classifier_output/cc.joblib')
+clf_colorS=load('classifier_output/cs.joblib')
 
 #write to a text file
 outputFile = open('outputFile.txt'.format(modelNumber),'w')

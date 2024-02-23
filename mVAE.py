@@ -1035,100 +1035,90 @@ clf_cs = svm.SVC(C=10, gamma='scale', kernel='rbf')#classify color map against s
 
 
 #training the shape map on shape labels and color labels
-def classifier_shape_train(whichdecode_use, train_dataset, train_loader_class):
-    global colorlabels, numcolors
-    colorlabels = np.random.randint(0, 10, 1000000)
-    train_colorlabels = 0
-    numcolors = 0
+def classifier_shape_train(whichdecode_use, train_dataset):
     vae.eval()
     with torch.no_grad():
-            data,train_shapelabels  =next(iter(train_loader_class))
-            data = data.cuda()
-            recon_batch, mu_color, log_var_color, mu_shape, log_var_shape = vae(data, whichdecode_use)
-            z_shape = vae.sampling(mu_shape, log_var_shape).cuda()
-            train_colorlabels = thecolorlabels(train_dataset)
-            print('training shape bottleneck against color labels sc')
-            clf_sc.fit(z_shape.cpu().numpy(), train_colorlabels)
+        data, labels  =next(iter(train_dataset))
+        train_shapelabels=labels[0].clone()
+        train_colorlabels=labels[1].clone()
 
-            print('training shape bottleneck against shape labels ss')
-            clf_ss.fit(z_shape.cpu().numpy(), train_shapelabels)
+        data = data.cuda()
+        recon_batch, mu_color, log_var_color, mu_shape, log_var_shape = vae(data, whichdecode_use)
+        z_shape = vae.sampling(mu_shape, log_var_shape).cuda()
+        print('training shape bottleneck against color labels sc')
+        clf_sc.fit(z_shape.cpu().numpy(), train_colorlabels)
+
+        print('training shape bottleneck against shape labels ss')
+        clf_ss.fit(z_shape.cpu().numpy(), train_shapelabels)
 
 #testing the shape classifier (one image at a time)
-def classifier_shape_test(whichdecode_use, clf_ss, clf_sc, test_dataset, test_loader_class,verbose =0):
-    global colorlabels, numcolors
-    colorlabels = np.random.randint(0, 10, 1000000)
-    numcolors = 0
-    test_colorlabels=0
+def classifier_shape_test(whichdecode_use, clf_ss, clf_sc, test_dataset, verbose=0):
+    vae.eval()
     with torch.no_grad():
-            data, test_shapelabels= next(iter (test_loader_class))
-            data = data.cuda()
-            recon_batch, mu_color, log_var_color, mu_shape, log_var_shape = vae(data, whichdecode_use)
-            z_shape = vae.sampling(mu_shape, log_var_shape).cuda()
-            test_colorlabels = thecolorlabels(test_dataset)
-            pred_ss = torch.tensor(clf_ss.predict(z_shape.cpu()))
-            pred_sc = torch.tensor(clf_sc.predict(z_shape.cpu()))
+        data, labels  =next(iter(test_dataset))
+        test_shapelabels=labels[0].clone()
+        test_colorlabels=labels[1].clone()
 
-            SSreport = torch.eq(test_shapelabels.cpu(), pred_ss).sum().float() / len(pred_ss)
-            SCreport = torch.eq(test_colorlabels.cpu(), pred_sc).sum().float() / len(pred_sc)
+        data = data.cuda()
+        recon_batch, mu_color, log_var_color, mu_shape, log_var_shape = vae(data, whichdecode_use)
+        z_shape = vae.sampling(mu_shape, log_var_shape).cuda()
+        pred_ss = torch.tensor(clf_ss.predict(z_shape.cpu()))
+        pred_sc = torch.tensor(clf_sc.predict(z_shape.cpu()))
 
+        SSreport = torch.eq(test_shapelabels.cpu(), pred_ss).sum().float() / len(pred_ss)
+        SCreport = torch.eq(test_colorlabels.cpu(), pred_sc).sum().float() / len(pred_sc)
 
-            if verbose ==1:
-                print('----*************---------shape classification from shape map')
-                print(confusion_matrix(test_shapelabels, pred_ss))
-                print(classification_report(test_shapelabels, pred_ss))
-                print('----************----------color classification from shape map')
-                print(confusion_matrix(test_colorlabels, pred_sc))
-                print(classification_report(test_colorlabels, pred_sc))
+        if verbose ==1:
+            print('----*************---------shape classification from shape map')
+            print(confusion_matrix(test_shapelabels, pred_ss))
+            print(classification_report(test_shapelabels, pred_ss))
+            print('----************----------color classification from shape map')
+            print(confusion_matrix(test_colorlabels, pred_sc))
+            print(classification_report(test_colorlabels, pred_sc))
+
     return pred_ss, pred_sc, SSreport, SCreport
 
 #training the color map on shape and color labels
-def classifier_color_train(whichdecode_use, train_dataset, train_loader_class,):
+def classifier_color_train(whichdecode_use, train_dataset):
     vae.eval()
-    global colorlabels, numcolors
-    colorlabels = np.random.randint(0, 10, 1000000)
-    numcolors = 0
-    train_colorlabels = 0
     with torch.no_grad():
-            data, train_shapelabels = next(iter (train_loader_class))
-            data = data.cuda()
-            recon_batch, mu_color, log_var_color, mu_shape, log_var_shape = vae(data, whichdecode_use)
-            z_color = vae.sampling(mu_color, log_var_color).cuda()
-            train_colorlabels = thecolorlabels(train_dataset)
-            print('training color bottleneck against color labels cc')
-            clf_cc.fit(z_color.cpu().numpy(), train_colorlabels)
+        data, labels  =next(iter(train_dataset))
+        train_shapelabels=labels[0].clone()
+        train_colorlabels=labels[1].clone()
+        data = data.cuda()
+        recon_batch, mu_color, log_var_color, mu_shape, log_var_shape = vae(data, whichdecode_use)
+        z_color = vae.sampling(mu_color, log_var_color).cuda()
+        print('training color bottleneck against color labels cc')
+        clf_cc.fit(z_color.cpu().numpy(), train_colorlabels)
 
-            print('training color bottleneck against shape labels cs')
-            clf_cs.fit(z_color.cpu().numpy(), train_shapelabels)
+        print('training color bottleneck against shape labels cs')
+        clf_cs.fit(z_color.cpu().numpy(), train_shapelabels)
 
 #testing the color classifier (one image at a time)
-def classifier_color_test(whichdecode_use, clf_cc, clf_cs, test_dataset, test_loader_class, verbose=0):
-    global colorlabels, numcolors
-    colorlabels = np.random.randint(0, 10, 1000000)
-    numcolors = 0
-
-    test_colorlabels = 0
+def classifier_color_test(whichdecode_use, clf_cc, clf_cs, test_dataset, verbose=0):
+    vae.eval()
     with torch.no_grad():
-            data, test_shapelabels = next(iter(test_loader_class))
-            data = data.cuda()
-            recon_batch, mu_color, log_var_color, mu_shape, log_var_shape = vae(data, whichdecode_use)
+        data, labels  =next(iter(test_dataset))
+        test_shapelabels=labels[0].clone()
+        test_colorlabels=labels[1].clone()
+        data = data.cuda()
+        recon_batch, mu_color, log_var_color, mu_shape, log_var_shape = vae(data, whichdecode_use)
 
-            z_color = vae.sampling(mu_color, log_var_color).cuda()
-            test_colorlabels = thecolorlabels(test_dataset)
-            pred_cc = torch.tensor(clf_cc.predict(z_color.cpu()))
-            pred_cs = torch.tensor(clf_cs.predict(z_color.cpu()))
+        z_color = vae.sampling(mu_color, log_var_color).cuda()
+        pred_cc = torch.tensor(clf_cc.predict(z_color.cpu()))
+        pred_cs = torch.tensor(clf_cs.predict(z_color.cpu()))
 
-            CCreport = torch.eq(test_colorlabels.cpu(), pred_cc).sum().float() / len(pred_cc)
-            CSreport = torch.eq(test_shapelabels.cpu(), pred_cs).sum().float() / len(pred_cs)
+        CCreport = torch.eq(test_colorlabels.cpu(), pred_cc).sum().float() / len(pred_cc)
+        CSreport = torch.eq(test_shapelabels.cpu(), pred_cs).sum().float() / len(pred_cs)
 
-            if verbose==1:
-                print('----**********-------color classification from color map')
-                print(confusion_matrix(test_colorlabels, pred_cc))
-                print(classification_report(test_colorlabels, pred_cc))
+        if verbose==1:
+            print('----**********-------color classification from color map')
+            print(confusion_matrix(test_colorlabels, pred_cc))
+            print(classification_report(test_colorlabels, pred_cc))
 
-
-                print('----**********------shape classification from color map')
-                print(confusion_matrix(test_shapelabels, pred_cs))
-                print(classification_report(test_shapelabels, pred_cs))
+            print('----**********------shape classification from color map')
+            print(confusion_matrix(test_shapelabels, pred_cs))
+            print(classification_report(test_shapelabels, pred_cs))
 
     return pred_cc, pred_cs, CCreport, CSreport
 
