@@ -151,16 +151,7 @@ def dataset_builder(data_set_flag, bs, element_colors = {}, retina = False, elem
         def __init__(self, dataset, data_set_flag, color_targets=None):
             self.dataset = dataset
             self.data_set_flag = data_set_flag
-            self.target_dict = {'fashion_mnist':10,'emnist':0,'mnist':0}
-            self.color_dict = None
-
-            if color_targets is not None:
-                colors = {}
-                for color in color_targets:
-                    for target in color_targets[color]:
-                        colors[target] = color
-
-                self.color_dict = colors
+            self.target_dict = {'fashion_mnist':36,'emnist':10,'mnist':0}
 
         def __len__(self):
             return len(self.dataset)
@@ -238,8 +229,9 @@ def dataset_builder(data_set_flag, bs, element_colors = {}, retina = False, elem
             test_dataset = CustomMNIST(mnist_dataset, test_locations, element_colors)
         elif color_labels is True:
             mnist_dataset = datasets.MNIST(root='./mnist_data/', train=True, transform = None, download=True)
+            mnist_dataset_test = datasets.MNIST(root='./mnist_data/', train=False, transform = None, download=True)
             train_dataset = CustomTargets(mnist_dataset, data_set_flag)
-            test_dataset = datasets.FashionMNIST('./fashionmnist_data/', train=False, transform = transforms.Compose([Colorize_func, transforms.ToTensor()]), download=True)        
+            test_dataset = CustomTargets(mnist_dataset_test, data_set_flag)
         else:
             train_dataset = datasets.MNIST(root='./mnist_data/', train=True, transform = transforms.Compose([Colorize_func, transforms.ToTensor()]), download=True)
             test_dataset = datasets.MNIST(root='./mnist_data/', train=False, transform = transforms.Compose([Colorize_func, transforms.ToTensor()]), download=True)
@@ -263,8 +255,11 @@ def dataset_builder(data_set_flag, bs, element_colors = {}, retina = False, elem
         elif color_labels is True:
             emnist_dataset = datasets.EMNIST(root='./data', split=split, train=True, transform=transforms.Compose([lambda img: transforms.functional.rotate(img, -90),
                     lambda img: transforms.functional.hflip(img)]), download=True)
+            emnist_dataset_test = datasets.EMNIST(root='./data', split=split, train=False, transform=transforms.Compose([lambda img: transforms.functional.rotate(img, -90),
+                    lambda img: transforms.functional.hflip(img)]), download=True)
             train_dataset = CustomTargets(emnist_dataset, data_set_flag)
-            test_dataset = datasets.FashionMNIST('./fashionmnist_data/', train=False, transform = transforms.Compose([Colorize_func, transforms.ToTensor()]), download=True)        
+            test_dataset = CustomTargets(emnist_dataset_test, data_set_flag)
+
         else:
             train_dataset = datasets.EMNIST(root='./data', split=split, train=True, transform=transforms.Compose([Colorize_func, lambda img: transforms.functional.rotate(img, -90),
                     lambda img: transforms.functional.hflip(img), transforms.ToTensor()]), download=True)
@@ -286,8 +281,9 @@ def dataset_builder(data_set_flag, bs, element_colors = {}, retina = False, elem
             test_dataset = CustomMNIST(fmnist_dataset, test_locations, element_colors)
         elif color_labels is True:
             fmnist_dataset = datasets.FashionMNIST('./fashionmnist_data/', train=True, transform = None, download=True)
+            fmnist_dataset_test = datasets.FashionMNIST('./fashionmnist_data/', train=True, transform = None, download=True)
             train_dataset = CustomTargets(fmnist_dataset, data_set_flag)
-            test_dataset = datasets.FashionMNIST('./fashionmnist_data/', train=False, transform = transforms.Compose([Colorize_func, transforms.ToTensor()]), download=True)        
+            test_dataset = CustomTargets(fmnist_dataset_test, data_set_flag)
         else:
             train_dataset = datasets.FashionMNIST('./fashionmnist_data/', train=True, transform = transforms.Compose([Colorize_func, transforms.ToTensor()]), download=True)
             test_dataset = datasets.FashionMNIST('./fashionmnist_data/', train=False, transform = transforms.Compose([Colorize_func, transforms.ToTensor()]), download=True)
