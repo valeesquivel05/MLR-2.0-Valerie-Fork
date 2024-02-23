@@ -25,7 +25,7 @@ mnist_dataset, mnist_skip, mnist_test_dataset = dataset_builder('mnist', bs, Non
 #concat datasets and init dataloaders
 train_loader_noSkip = torch.utils.data.DataLoader(dataset=ConcatDataset([emnist_dataset, fmnist_dataset, mnist_dataset]), batch_size=bs, shuffle=True,  drop_last= True)
 test_loader_noSkip = torch.utils.data.DataLoader(dataset=ConcatDataset([emnist_test_dataset, fmnist_test_dataset, mnist_test_dataset]), batch_size=bs, shuffle=True, drop_last=True)
-emnist_skip = torch.utils.data.DataLoader(dataset=ConcatDataset([emnist_dataset, mnist_dataset]), batch_size=bs, shuffle=True,  drop_last= True)
+emnist_skip = torch.utils.data.DataLoader(dataset=ConcatDataset([emnist_skip, mnist_skip]), batch_size=bs, shuffle=True,  drop_last= True)
 fmnist_skip = torch.utils.data.DataLoader(dataset=fmnist_skip, batch_size=bs, shuffle=True,  drop_last= True)
 
 

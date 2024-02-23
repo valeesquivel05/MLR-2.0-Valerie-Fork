@@ -4,7 +4,7 @@ from mVAE import vae, load_checkpoint
 from torch.utils.data import DataLoader, ConcatDataset
 from dataset_builder import dataset_builder
 
-load_checkpoint('output_emnist_VAE1/checkpoint_300.pth')
+load_checkpoint('output_emnist_recurr/checkpoint_300.pth')
 bs = 50
 #load_checkpoint_shapelabels('output_label_net/checkpoint_shapelabels5.pth')
 
@@ -19,7 +19,6 @@ train_loader_noSkip = torch.utils.data.DataLoader(dataset=ConcatDataset([emnist_
 for epoch in range (1,21):
    
     train_labels(epoch, train_loader_noSkip)
-
         
     if epoch in [1,5,10,20]:
         checkpoint =  {
