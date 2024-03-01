@@ -1099,8 +1099,8 @@ def classifier_color_test(whichdecode_use, clf_cc, clf_cs, test_dataset, verbose
     vae.eval()
     with torch.no_grad():
         data, labels  =next(iter(test_dataset))
-        test_shapelabels=labels[0].clone()
-        test_colorlabels=labels[1].clone()
+        train_shapelabels=labels[0].clone()
+        train_colorlabels=labels[1].clone()
         data = data.cuda()
         recon_batch, mu_color, log_var_color, mu_shape, log_var_shape = vae(data, whichdecode_use)
 
@@ -1197,9 +1197,9 @@ class VAEshapelabels(nn.Module):
         self.fc22label = nn.Linear(hlabel_dim, zlabel_dim) #log-var shape
 
 
-    def sampling_labels (self, mu, log_var, n=0):
-        std = torch.exp(n * log_var)
-        eps = torch.randn_like(std)
+    def sampling_labels (self, mu, log_var, n=1):
+        std = torch.exp(0.5 * log_var)
+        eps = torch.randn_like(std) * n
         return mu + eps * std
 
     def forward(self, x_labels, n):

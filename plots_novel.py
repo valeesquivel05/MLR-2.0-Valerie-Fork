@@ -56,6 +56,11 @@ else:
 
 modelNumber= 1 #which model should be run, this can be 1 through 10
 
+folder_path = f'output{modelNumber}' # the output folder for the trained model versions
+
+if not os.path.exists(folder_path):
+    os.mkdir(folder_path)
+
 # reload a saved file
 def load_checkpoint(filepath):
     checkpoint = torch.load(filepath,device)
@@ -66,7 +71,7 @@ def load_checkpoint(filepath):
     return vae
 
 #load_checkpoint('output/checkpoint_threeloss_singlegrad200_smfc.pth'.format(modelNumber=modelNumber))
-load_checkpoint('output_emnist_recurr/checkpoint_300.pth') # MLR2.0 trained on emnist letters, digits, and fashion mnist
+load_checkpoint('output_emnist_recurr1/checkpoint_300.pth') # MLR2.0 trained on emnist letters, digits, and fashion mnist
 
 #print('Loading the classifiers')
 clf_shapeS=load('classifier_output/ss.joblib')
@@ -103,7 +108,7 @@ hugepermnum=10000
 bigpermnum = 500
 smallpermnum = 100
 
-Fig2aFlag = 0       #binding pool reconstructions   NOTWORKING
+Fig2aFlag = 1       #binding pool reconstructions   NOTWORKING
 fig_new_loc = 0     # reconstruct retina images with digits in the location opposite of training
 fig_loc_compare = 1 # compare retina images with digits in the same location as training and opposite location  
 Fig2bFlag = 1        #novel objects stored and retrieved from memory, one at a time
@@ -166,19 +171,22 @@ if Fig2aFlag==1:
 
     #run them all through the encoder
     l1_act, l2_act, shape_act, color_act, location_act = activations(imgs)  #get activations from this small set of images
+    '''BPOut, Tokenbindings = BPTokens_storage(bpsize, bpPortion, l1_act[n,:].view(1,-1), l2_act[n,:].view(1,-1), shape_act[n,:].view(1,-1),color_act[n,:].view(1,-1),location_act[n,:].view(1,-1),0, 0,0,1,0,1,normalize_fact_novel)
+        shape_out_all, color_out_all, location_out_all, BP_layer2_out, BP_layerI_out = BPTokens_retrieveByToken( bpsize, bpPortion, BPOut, Tokenbindings,l1_act.view(numimg,-1), l2_act.view(numimg,-1), shape_act,color_act,location_act,1,normalize_fact_novel)
+    '''
+    '''def BPTokens_storage(bpsize, bpPortion,l1_act, l2_act, shape_act, color_act, location_act, shape_coeff, color_coeff, location_coeff, l1_coeff,l2_coeff, bs_testing, normalize_fact):
+    '''
+    BPOut_all, Tokenbindings_all = BPTokens_storage(bpsize, bpPortion, l1_act, l2_act, shape_act,color_act,location_act,shape_coeff, color_coeff, location_coeff, l1_coeff,l2_coeff,1,normalize_fact_novel)
+        
+    shape_out_all, color_out_all, location_out_all, BP_layer2_out, BP_layerI_out = BPTokens_retrieveByToken( bpsize, bpPortion, BPOut_all, Tokenbindings_all,l1_act, l2_act, shape_act,color_act,location_act,1,normalize_fact_novel)
 
-    #binding pool outputs
-    BP_in, shape_out_BP_both, color_out_BP_both, BP_layerI_junk, BP_layer2_junk =            BP(bpPortion , l1_act, l2_act, shape_act, color_act, location_act, shape_coeff, color_coeff, location_coeff, l1_coeff,l2_coeff,normalize_fact_familiar)
-    BP_in, shape_out_BP_shapeonly,  color_out_BP_shapeonly, BP_layerI_junk, BP_layer2_junk = BP(bpPortion , l1_act, l2_act, shape_act, color_act, location_act, shape_coeff, 0,0,0,0,normalize_fact_familiar)
-    BP_in,  shape_out_BP_coloronly, color_out_BP_coloronly, BP_layerI_junk, BP_layer2_junk = BP(bpPortion , l1_act, l2_act, shape_act, color_act, 0, color_coeff,0,0,normalize_fact_familiar)
-    BP_in,  shape_out_BP_junk, color_out_BP_junk, BP_layerI_out, BP_layer2_junk = BP(bpPortion , l1_act, l2_act, shape_act, color_act, 0, 0,l1_coeff,0,normalize_fact_familiar)
-    BP_in,  shape_out_BP_junk, color_out_BP_junk, BP_layerI_junk, BP_layer2_out = BP(bpPortion , l1_act, l2_act, shape_act, color_act, 0, 0,0,l2_coeff,normalize_fact_familiar)
-
+    
     #memory retrievals from Bottleneck storage
-    bothRet = vae.decoder_noskip(shape_out_BP_both, color_out_BP_both, 0).cuda()  # memory retrieval from the bottleneck
-    shapeRet = vae.decoder_shape(shape_out_BP_shapeonly, color_out_BP_shapeonly , 0).cuda()  #memory retrieval from the shape map
-    colorRet = vae.decoder_color(shape_out_BP_coloronly, color_out_BP_coloronly, 0).cuda()  #memory retrieval from the color map
-
+    bothRet = vae.decoder_cropped(shape_out_all, color_out_all,0, 0).cuda()  # memory retrieval from the bottleneck
+    #shapeRet = vae.decoder_shape(shape_out_BP_shapeonly, color_out_BP_shapeonly , 0).cuda()  #memory retrieval from the shape map
+    #colorRet = vae.decoder_color(shape_out_BP_coloronly, color_out_BP_coloronly, 0).cuda()  #memory retrieval from the color map
+    shapeRet = bothRet
+    colorRet = bothRet
     save_image(
         torch.cat([imgs[0: numimg].view(numimg, 3, 28, 28), bothRet[0: numimg].view(numimg, 3, 28, 28),
                    shapeRet[0: numimg].view(numimg, 3, 28, 28), colorRet[0: numimg].view(numimg, 3, 28, 28)], 0),
