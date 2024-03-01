@@ -10,7 +10,7 @@ bs = 50
 
 
 # trainging datasets, the return loaders flag is False so the datasets can be concated in the dataloader
-emnist_dataset, emnist_skip, emnist_test_dataset = dataset_builder('mnist', bs, None, False, None, False, True)
+emnist_dataset, emnist_skip, emnist_test_dataset = dataset_builder('emnist', bs, None, False, None, False, True)
 mnist_dataset, mnist_skip, mnist_test_dataset = dataset_builder('mnist', bs, None, False, None, False, True)
 
 #concat datasets and init dataloaders

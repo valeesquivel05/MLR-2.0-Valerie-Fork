@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from sklearn import svm
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-
+from torchvision import utils
 from mVAE import vae
 from PIL import Image, ImageOps, ImageEnhance, __version__ as PILLOW_VERSION
 
@@ -20,6 +20,8 @@ def classifier_shape_train(whichdecode_use, train_dataset):
         data, labels = next(iter(train_dataset))
         train_shapelabels=labels[0].clone()
         train_colorlabels=labels[1].clone()
+        print(train_shapelabels[0:10])
+        utils.save_image(data[0:10],'train_sample.png')
 
         data = data.cuda()
         recon_batch, mu_color, log_var_color, mu_shape, log_var_shape, mu_location, log_var_location = vae(data, whichdecode_use)

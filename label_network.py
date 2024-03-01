@@ -14,8 +14,9 @@ from joblib import dump, load
 import copy
 
 bs = 100
+s_classes = 36
 
-vae_shape_labels= VAEshapelabels(xlabel_dim=20, hlabel_dim=7,  zlabel_dim=16)
+vae_shape_labels= VAEshapelabels(xlabel_dim=s_classes, hlabel_dim=20,  zlabel_dim=16)
 vae_color_labels= VAEcolorlabels(xlabel_dim=10, hlabel_dim=7,  zlabel_dim=16)
 if torch.cuda.is_available():
     vae.cuda()
@@ -81,7 +82,7 @@ def train_labels(epoch, train_loader):
               
         image = image.cuda()
         labels_shape = labels_for_shape.cuda()
-        input_oneHot = F.one_hot(labels_shape, num_classes=20) # 47 classes in emnist, 10 classes in f-mnist
+        input_oneHot = F.one_hot(labels_shape, num_classes=s_classes) # 36 classes in emnist, 10 classes in f-mnist
         input_oneHot = input_oneHot.float()
         input_oneHot = input_oneHot.cuda()
 
@@ -91,7 +92,7 @@ def train_labels(epoch, train_loader):
         color_oneHot = color_oneHot.float()
         color_oneHot = color_oneHot.cuda()
         
-        n = 0.5 # sampling noise
+        n = 1 # sampling noise
         z_shape_label = vae_shape_labels(input_oneHot,n)
         z_color_label = vae_color_labels(color_oneHot)
 
@@ -168,7 +169,7 @@ def test_outputs(test_loader, n = 0.5):
               
         image = image.cuda()
         labels_shape = labels_for_shape.cuda()
-        input_oneHot = F.one_hot(labels_shape, num_classes=20) # 47 classes in emnist, 10 classes in f-mnist
+        input_oneHot = F.one_hot(labels_shape, num_classes=s_classes) # 47 classes in emnist, 10 classes in f-mnist
         input_oneHot = input_oneHot.float()
         input_oneHot = input_oneHot.cuda()
 
@@ -178,6 +179,7 @@ def test_outputs(test_loader, n = 0.5):
         color_oneHot = color_oneHot.float()
         color_oneHot = color_oneHot.cuda()
         
+        n=1
         z_shape_label = vae_shape_labels(input_oneHot,n)
         z_color_label = vae_color_labels(color_oneHot)
 

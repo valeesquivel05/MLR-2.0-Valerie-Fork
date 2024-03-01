@@ -19,11 +19,11 @@ test_bs = 10000
 # trainging datasets, the return loaders flag is False so the datasets can be concated in the dataloader
 emnist_dataset, emnist_skip, emnist_test_dataset = dataset_builder('emnist', bs, None, False, None, False, True)
 mnist_dataset, mnist_skip, mnist_test_dataset = dataset_builder('mnist', bs, None, False, None, False, True)
-fmnist_dataset, fmnist_skip, fmnist_test_dataset = dataset_builder('fashion_mnist', bs, None, False, None, False, True)
+#fmnist_dataset, fmnist_skip, fmnist_test_dataset = dataset_builder('fashion_mnist', bs, None, False, None, False, True)
 
 #concat datasets and init dataloaders
-train_loader = torch.utils.data.DataLoader(dataset=ConcatDataset([emnist_dataset, mnist_dataset, fmnist_dataset]), batch_size=bs, shuffle=True,  drop_last= True)
-test_loader = torch.utils.data.DataLoader(dataset=ConcatDataset([emnist_test_dataset, mnist_test_dataset, fmnist_test_dataset]), batch_size=test_bs, shuffle=True,  drop_last= True)
+train_loader = torch.utils.data.DataLoader(dataset=ConcatDataset([emnist_dataset, mnist_dataset, mnist_dataset]), batch_size=bs, shuffle=True,  drop_last= True)
+test_loader = torch.utils.data.DataLoader(dataset=ConcatDataset([emnist_test_dataset, mnist_test_dataset, mnist_test_dataset]), batch_size=test_bs, shuffle=True,  drop_last= True)
 
 print('training shape classifiers')
 classifier_shape_train('cropped', train_loader)

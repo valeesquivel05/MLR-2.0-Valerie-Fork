@@ -151,7 +151,7 @@ def dataset_builder(data_set_flag, bs, element_colors = {}, retina = False, elem
         def __init__(self, dataset, data_set_flag, color_targets=None):
             self.dataset = dataset
             self.data_set_flag = data_set_flag
-            self.target_dict = {'fashion_mnist':36,'emnist':10,'mnist':0}
+            self.target_dict = {'fashion_mnist':35,'emnist':9,'mnist':0}
 
         def __len__(self):
             return len(self.dataset)
