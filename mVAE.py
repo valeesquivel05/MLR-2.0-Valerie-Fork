@@ -185,6 +185,9 @@ class VAE_CNN(nn.Module):
 
         return self.fc31(h), self.fc32(h), self.fc33(h), self.fc34(h), self.fc35(l), self.fc36(l), hskip # mu, log_var
 
+    def location_encoder(self, l):
+        return self.sampling_location(self.fc35(l), self.fc36(l))
+
     def sampling_location(self, mu, log_var):
         std = (0.5 * log_var)
         eps = torch.randn_like(std)
@@ -195,9 +198,14 @@ class VAE_CNN(nn.Module):
         eps = torch.randn_like(std)
         return mu + eps * std
 
-    def decoder_retinal(self, z_shape, z_color, z_location, hskip): #recurrent
+    def decoder_retinal(self, z_shape, z_color, z_location, hskip = None, whichdecode = None): #recurrent
         # digit recon
-        h = (F.relu(self.fc4c(z_color)) * 2) + (F.relu(self.fc4s(z_shape)) * 1.3)
+        if whichdecode == 'shape':
+            h = (F.relu(self.fc4s(z_shape)) * 1.3)
+        elif whichdecode == 'color':
+            h = (F.relu(self.fc4c(z_color)) * 2)
+        else:
+            h = (F.relu(self.fc4c(z_color)) * 2) + (F.relu(self.fc4s(z_shape)) * 1.3)
         h = F.relu(self.fc5(h)).view(-1, 16, int(imgsize/4), int(imgsize/4))
         h = self.relu(self.bn5(self.conv5(h)))
         h = self.relu(self.bn6(self.conv6(h)))
@@ -709,7 +717,7 @@ def test(whichdecode, test_loader_noSkip, test_loader_skip, bs):
     test_loss /= len(test_loader_noSkip.dataset)
     print('====> Test set loss: {:.4f}'.format(test_loss))
 
-def activations(image, l = None):
+def activations(image, l= None):
     if l is None:
         l = torch.zeros(image.size()[0], vae.l_dim).cuda()
 
