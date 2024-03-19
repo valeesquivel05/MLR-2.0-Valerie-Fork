@@ -29,6 +29,7 @@ print('training shape classifiers')
 classifier_shape_train('cropped', train_loader)
 dump(clf_sc, f'{folder_path}/sc.joblib')
 dump(clf_ss, f'{folder_path}/ss.joblib')
+clf_ss=load('classifier_output/ss.joblib')
 
 pred_ss, pred_sc, SSreport, SCreport = classifier_shape_test('cropped', clf_ss, clf_sc, test_loader)
 print('accuracy:')
