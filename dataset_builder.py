@@ -149,18 +149,47 @@ def dataset_builder(data_set_flag, bs, element_colors = {}, retina = False, elem
 
     class CustomTargets(Dataset):
         def __init__(self, dataset, data_set_flag, color_targets=None):
+            self.lowercase = list(range(0,10)) + list(range(36,63))
             self.dataset = dataset
             self.data_set_flag = data_set_flag
-            self.target_dict = {'fashion_mnist':35,'emnist':9,'mnist':0}
+            self.target_dict = {'fashion_mnist':35, 'emnist':0, 'emnist_test':0, 'mnist':0}
+            self.indices = torch.load('uppercase_ind.pt')
+            if data_set_flag == 'emnist_test':
+                self.lowercase = list(range(0,10)) + list(range(36,63))
+                self.indices = torch.load('uppercase_ind_test.pt') #self._filter_indices() #
+
+        def _filter_indices(self):
+            indices = []
+            count = {target: 0 for target in list(range(10,36))}
+            print('starting indices collection')
+            for i in range(len(self.dataset)):
+                img, target = self.dataset[i]
+                if target not in self.lowercase and count[target] <= 6000:
+                    indices += [i]
+                    count[target] += 1
+            print(count)
+            torch.save(indices, 'uppercase_ind_test.pt')
+            print('saved indices')
+            return indices
 
         def __len__(self):
             return len(self.dataset)
 
         def __getitem__(self, index):
+            if self.data_set_flag == 'emnist':
+                if index >= len(self.indices):
+                    index = randint(0,len(self.indices)-1)
+                index = self.indices[index]
+            
+            elif self.data_set_flag == 'emnist_test':
+                if index >= len(self.indices):
+                    index = randint(0,len(self.indices)-1)
+                index = self.indices[index]
+
             image, target = self.dataset[index]
             col = randint(0,9)
             transform = transforms.Compose([Colorize_specific(col = col), transforms.ToTensor()])
-            target = (target+self.target_dict[self.data_set_flag], col)
+            target = (target + self.target_dict[self.data_set_flag], col)
             return transform(image), target
 
     class CustomMNIST(Dataset):
@@ -177,6 +206,10 @@ def dataset_builder(data_set_flag, bs, element_colors = {}, retina = False, elem
             self.translate_any = PadAndPosition(translate_to_any(retina_size))
             self.color_dict = None
 
+            if data_set_flag == 'emnist':
+                self.lowercase = list(range(0,10)) + list(range(36,63))
+                self.indices = self._filter_indices() #torch.load('uppercase_ind.pt') #
+
             if color_targets is not None:
                 colors = {}
                 for color in color_targets:
@@ -184,11 +217,30 @@ def dataset_builder(data_set_flag, bs, element_colors = {}, retina = False, elem
                         colors[target] = color
 
                 self.color_dict = colors
+        
+        def _filter_indices(self):
+            indices = []
+            count = {target: 0 for target in list(range(10,36))}
+            print('starting indices collection')
+            for i in range(len(self.dataset)):
+                img, target = self.dataset[i]
+                if target not in self.lowercase and count[target] <= 6000:
+                    indices += [i]
+                    count[target] += 1
+            print(count)
+            torch.save(indices, 'uppercase_ind.pt')
+            print('saved indices')
+            return indices
 
         def __len__(self):
             return len(self.dataset)
 
         def __getitem__(self, index):
+            if data_set_flag == 'emnist':
+                if index > len(self.indices) and index > 1:
+                    index = randint(0,len(self.indices)-1)
+                index = self.indices[index]
+            
             image, target = self.dataset[index]
 
             # check if a specific location is assigned to this element's class
@@ -224,14 +276,15 @@ def dataset_builder(data_set_flag, bs, element_colors = {}, retina = False, elem
         if retina is True:
             mnist_dataset = datasets.MNIST(root='./mnist_data/', train=True, transform = None, download=True)
             train_dataset = CustomMNIST(mnist_dataset, element_locations, element_colors)
-
             test_locations = {'right':element_locations['left'], 'left':element_locations['right']}
             test_dataset = CustomMNIST(mnist_dataset, test_locations, element_colors)
+
         elif color_labels is True:
             mnist_dataset = datasets.MNIST(root='./mnist_data/', train=True, transform = None, download=True)
             mnist_dataset_test = datasets.MNIST(root='./mnist_data/', train=False, transform = None, download=True)
             train_dataset = CustomTargets(mnist_dataset, data_set_flag)
             test_dataset = CustomTargets(mnist_dataset_test, data_set_flag)
+
         else:
             train_dataset = datasets.MNIST(root='./mnist_data/', train=True, transform = transforms.Compose([Colorize_func, transforms.ToTensor()]), download=True)
             test_dataset = datasets.MNIST(root='./mnist_data/', train=False, transform = transforms.Compose([Colorize_func, transforms.ToTensor()]), download=True)
@@ -243,7 +296,7 @@ def dataset_builder(data_set_flag, bs, element_colors = {}, retina = False, elem
                                     transform=transforms.Compose([Colorize_func,transforms.RandomRotation(90), transforms.RandomCrop(size=28, padding= 8), transforms.ToTensor()]), download=True)
 
     if data_set_flag == 'emnist':
-        split = 'letters' #byclass
+        split = 'byclass'
         # EMNIST letters are rotated by 90 degrees and flipped by default, the functional rotate and hflip transforms correct for this
         if retina is True:
             emnist_dataset = datasets.EMNIST(root='./data', split=split, train=True, transform=transforms.Compose([lambda img: transforms.functional.rotate(img, -90),
@@ -252,13 +305,14 @@ def dataset_builder(data_set_flag, bs, element_colors = {}, retina = False, elem
 
             test_locations = {'right':element_locations['left'], 'left':element_locations['right']}
             test_dataset = CustomMNIST(emnist_dataset, test_locations, element_colors)
+
         elif color_labels is True:
             emnist_dataset = datasets.EMNIST(root='./data', split=split, train=True, transform=transforms.Compose([lambda img: transforms.functional.rotate(img, -90),
                     lambda img: transforms.functional.hflip(img)]), download=True)
             emnist_dataset_test = datasets.EMNIST(root='./data', split=split, train=False, transform=transforms.Compose([lambda img: transforms.functional.rotate(img, -90),
                     lambda img: transforms.functional.hflip(img)]), download=True)
             train_dataset = CustomTargets(emnist_dataset, data_set_flag)
-            test_dataset = CustomTargets(emnist_dataset_test, data_set_flag)
+            test_dataset = CustomTargets(emnist_dataset_test, data_set_flag+'_test')
 
         else:
             train_dataset = datasets.EMNIST(root='./data', split=split, train=True, transform=transforms.Compose([Colorize_func, lambda img: transforms.functional.rotate(img, -90),
