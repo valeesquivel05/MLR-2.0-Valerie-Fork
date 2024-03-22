@@ -71,8 +71,8 @@ def train_labels(epoch, train_loader):
     dataiter = iter(train_loader)
 
     # labels_color=0
-
-    for i in tqdm(range(len(train_loader))):
+    max_iter = 2000
+    for i in tqdm(range(len(train_loader)), total= max_iter):
         optimizer_shapelabels.zero_grad()
         optimizer_colorlabels.zero_grad()
 
@@ -150,11 +150,11 @@ def train_labels(epoch, train_loader):
                 normalize=False,
                 range=(-1, 1),
             )
-
+        if i > max_iter + 1:
+            break
     print(
         '====> Epoch: {} Average loss shape: {:.4f}'.format(epoch, train_loss_shapelabel / (len(train_loader.dataset) / bs)))
     print('====> Epoch: {} Average loss color: {:.4f}'.format(epoch,train_loss_colorlabel / (len(train_loader.dataset) / bs)))
-
 
 
 def test_outputs(test_loader, n = 0.5):

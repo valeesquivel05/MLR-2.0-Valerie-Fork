@@ -16,30 +16,31 @@ def load_checkpoint(filepath):
     return vae
 modelNumber = 1
 
-load_checkpoint('output_emnist_recurr/checkpoint_300.pth') # MLR2.0 trained on emnist letters, digits, and fashion mnist
+'''load_checkpoint('output_emnist_recurr/checkpoint_300.pth') # MLR2.0 trained on emnist letters, digits, and fashion mnist
 
 vae.eval()
 
-'''bs = 1
+bs = 1
 # trainging datasets, the return loaders flag is False so the datasets can be concated in the dataloader
 emnist_dataset, emnist_skip, emnist_test_dataset = dataset_builder('emnist', bs, None, False, None, False, True)
-#mnist_dataset, mnist_skip, mnist_test_dataset = dataset_builder('mnist', bs, None, False, None, False, True)
+mnist_dataset, mnist_skip, mnist_test_dataset = dataset_builder('mnist', bs, None, False, None, False, True)
 #fmnist_dataset, fmnist_skip, fmnist_test_dataset = dataset_builder('fashion_mnist', bs, None, False, None, False, True)
 
 #concat datasets and init dataloaders
-train_loader = torch.utils.data.DataLoader(dataset=ConcatDataset([emnist_dataset]), batch_size=bs, shuffle=True,  drop_last= True)
+train_loader = torch.utils.data.DataLoader(dataset=ConcatDataset([mnist_dataset]), batch_size=bs, shuffle=True,  drop_last= True)
 
-torch.save([], 'emnist_rep.pt')
+torch.save([], 'mnist_rep.pt')
 
 reps = []
 c = 0
 for data_tup in tqdm(train_loader):
     z_shape, z_color, z_location = image_activations(data_tup[0].view(-1,3,28,28).cuda())
     reps += [(z_shape,data_tup[1][0].item())]
+    #print(data_tup[1][0].item())
     if len(reps)==1200:
-        x = torch.load('emnist_rep.pt')
+        x = torch.load('mnist_rep.pt')
         out = x + reps
-        torch.save(out, 'emnist_rep.pt')
+        torch.save(out, 'mnist_rep.pt')
         torch.cuda.empty_cache()
         reps=[]
     if c > 6000:
@@ -70,7 +71,7 @@ for i, cls in enumerate(unique_classes):
     plt.scatter(embedded_data[class_indices, 0], embedded_data[class_indices, 1], 
                 label=f'Class {cls}', color=class_to_color[cls], marker='o')
 
-    representative_index = class_indices[random.randint(0,25)]
+    representative_index = class_indices[random.randint(min(unique_classes), max(unique_classes) + 1)] #
     plt.annotate(f'{cls}', (embedded_data[representative_index, 0], embedded_data[representative_index, 1]), fontsize=20)
 plt.legend()
 plt.show()
