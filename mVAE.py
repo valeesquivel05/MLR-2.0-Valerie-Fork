@@ -174,6 +174,10 @@ class VAE_CNN(nn.Module):
         self.relu = nn.ReLU()
         self.skipconv = nn.Conv2d(16,16,kernel_size=1,stride=1,padding =0,bias=False)
 
+        # map scalars
+        self.shape_scale = 1.9
+        self.color_scale = 2
+
     def encoder(self, x, l):
         h = self.relu(self.bn1(self.conv1(x)))
         h = self.relu(self.bn2(self.conv2(h)))
@@ -201,11 +205,11 @@ class VAE_CNN(nn.Module):
     def decoder_retinal(self, z_shape, z_color, z_location, hskip = None, whichdecode = None): #recurrent
         # digit recon
         if whichdecode == 'shape':
-            h = (F.relu(self.fc4s(z_shape)) * 1.3)
+            h = (F.relu(self.fc4s(z_shape)) * self.shape_scale)
         elif whichdecode == 'color':
-            h = (F.relu(self.fc4c(z_color)) * 2)
+            h = (F.relu(self.fc4c(z_color)) * self.color_scale)
         else:
-            h = (F.relu(self.fc4c(z_color)) * 2) + (F.relu(self.fc4s(z_shape)) * 1.3)
+            h = (F.relu(self.fc4c(z_color)) * self.color_scale) + (F.relu(self.fc4s(z_shape)) * self.shape_scale)
         h = F.relu(self.fc5(h)).view(-1, 16, int(imgsize/4), int(imgsize/4))
         h = self.relu(self.bn5(self.conv5(h)))
         h = self.relu(self.bn6(self.conv6(h)))
@@ -228,7 +232,7 @@ class VAE_CNN(nn.Module):
         return torch.sigmoid(h)
 
     def decoder_color(self, z_shape, z_color, hskip):
-        h = F.relu(self.fc4c(z_color))*2
+        h = F.relu(self.fc4c(z_color)) * self.color_scale
         h = F.relu(self.fc5(h)).view(-1, 16, int(imgsize / 4), int(imgsize / 4))
         h = self.relu(self.bn5(self.conv5(h)))
         h = self.relu(self.bn6(self.conv6(h)))
@@ -237,7 +241,7 @@ class VAE_CNN(nn.Module):
         return torch.sigmoid(h)
 
     def decoder_shape(self, z_shape, z_color, hskip):
-        h = F.relu(self.fc4s(z_shape)) * 1.3
+        h = F.relu(self.fc4s(z_shape)) * self.shape_scale
         h = F.relu(self.fc5(h)).view(-1, 16, int(imgsize / 4), int(imgsize / 4))
         h = self.relu(self.bn5(self.conv5(h)))
         h = self.relu(self.bn6(self.conv6(h)))
@@ -250,7 +254,7 @@ class VAE_CNN(nn.Module):
         return torch.sigmoid(h)
 
     def decoder_cropped(self, z_shape, z_color, z_location, hskip=0):
-        h = F.relu(self.fc4c(z_color)) + F.relu(self.fc4s(z_shape))
+        h = (F.relu(self.fc4c(z_color)) * self.color_scale) + (F.relu(self.fc4s(z_shape)) * self.shape_scale)
         h = F.relu(self.fc5(h)).view(-1, 16, int(imgsize / 4), int(imgsize / 4))
         h = self.relu(self.bn5(self.conv5(h)))
         h = self.relu(self.bn6(self.conv6(h)))
