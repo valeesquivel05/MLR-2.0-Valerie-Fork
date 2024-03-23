@@ -193,8 +193,9 @@ def dataset_builder(data_set_flag, bs, element_colors = {}, retina = False, elem
             return transform(image), target
 
     class CustomMNIST(Dataset):
-        def __init__(self, dataset, location_targets, color_targets=None):
+        def __init__(self, dataset, location_targets, color_targets=None, dataset_flag=None):
             self.dataset = dataset
+            self.dataset_flag = data_set_flag
             self.right_targets = []
             self.left_targets = []
             if 'right' in location_targets:
@@ -208,7 +209,7 @@ def dataset_builder(data_set_flag, bs, element_colors = {}, retina = False, elem
 
             if data_set_flag == 'emnist':
                 self.lowercase = list(range(0,10)) + list(range(36,63))
-                self.indices = self._filter_indices() #torch.load('uppercase_ind.pt') #
+                self.indices = torch.load('uppercase_ind.pt') #self._filter_indices()
 
             if color_targets is not None:
                 colors = {}
@@ -236,8 +237,8 @@ def dataset_builder(data_set_flag, bs, element_colors = {}, retina = False, elem
             return len(self.dataset)
 
         def __getitem__(self, index):
-            if data_set_flag == 'emnist':
-                if index > len(self.indices) and index > 1:
+            if self.dataset_flag == 'emnist':
+                if index >= len(self.indices):
                     index = randint(0,len(self.indices)-1)
                 index = self.indices[index]
             
@@ -304,7 +305,7 @@ def dataset_builder(data_set_flag, bs, element_colors = {}, retina = False, elem
             train_dataset = CustomMNIST(emnist_dataset, element_locations, element_colors)
 
             test_locations = {'right':element_locations['left'], 'left':element_locations['right']}
-            test_dataset = CustomMNIST(emnist_dataset, test_locations, element_colors)
+            test_dataset = CustomMNIST(emnist_dataset, test_locations, element_colors, data_set_flag+'_test')
 
         elif color_labels is True:
             emnist_dataset = datasets.EMNIST(root='./data', split=split, train=True, transform=transforms.Compose([lambda img: transforms.functional.rotate(img, -90),

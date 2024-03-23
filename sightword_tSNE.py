@@ -15,8 +15,8 @@ def load_checkpoint(filepath):
     vae.load_state_dict(checkpoint['state_dict'])
     return vae
 modelNumber = 1
-
-'''load_checkpoint('output_emnist_recurr/checkpoint_300.pth') # MLR2.0 trained on emnist letters, digits, and fashion mnist
+v = '' #'_v1'
+load_checkpoint(f'output_emnist_recurr{v}/checkpoint_300.pth') # MLR2.0 trained on emnist letters, digits, and fashion mnist
 
 vae.eval()
 
@@ -29,7 +29,9 @@ mnist_dataset, mnist_skip, mnist_test_dataset = dataset_builder('mnist', bs, Non
 #concat datasets and init dataloaders
 train_loader = torch.utils.data.DataLoader(dataset=ConcatDataset([mnist_dataset]), batch_size=bs, shuffle=True,  drop_last= True)
 
-torch.save([], 'mnist_rep.pt')
+cur_dataset = 'mnist'
+
+torch.save([], f'{cur_dataset}rep.pt')
 
 reps = []
 c = 0
@@ -38,9 +40,9 @@ for data_tup in tqdm(train_loader):
     reps += [(z_shape,data_tup[1][0].item())]
     #print(data_tup[1][0].item())
     if len(reps)==1200:
-        x = torch.load('mnist_rep.pt')
+        x = torch.load(f'{cur_dataset}rep.pt')
         out = x + reps
-        torch.save(out, 'mnist_rep.pt')
+        torch.save(out, f'{cur_dataset}rep.pt')
         torch.cuda.empty_cache()
         reps=[]
     if c > 6000:
@@ -49,9 +51,9 @@ for data_tup in tqdm(train_loader):
 
 print('Samples done')
 
-torch.cuda.empty_cache()'''
+torch.cuda.empty_cache()
 
-data= torch.load('mnist_rep.pt')
+data= torch.load(f'{cur_dataset}rep.pt')
 
 data = data[:3000]
 

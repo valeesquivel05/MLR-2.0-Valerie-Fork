@@ -7,12 +7,13 @@ from torch.utils.data import DataLoader, ConcatDataset
 import torch
 import os
 
-folder_path = 'classifier_output' # the output folder for the trained model versions
+v = ''
+folder_path = f'classifier_output{v}' # the output folder for the trained model versions
 
 if not os.path.exists(folder_path):
     os.mkdir(folder_path)
 
-load_checkpoint('output_emnist_recurr/checkpoint_300.pth') # MLR2.0 trained on emnist letters, digits, and fashion mnist
+load_checkpoint(f'output_emnist_recurr{v}/checkpoint_300.pth') # MLR2.0 trained on emnist letters, digits, and fashion mnist
 
 bs = 20000
 test_bs = 10000
@@ -29,7 +30,6 @@ print('training shape classifiers')
 classifier_shape_train('cropped', train_loader)
 dump(clf_sc, f'{folder_path}/sc.joblib')
 dump(clf_ss, f'{folder_path}/ss.joblib')
-clf_ss=load('classifier_output/ss.joblib')
 
 pred_ss, pred_sc, SSreport, SCreport = classifier_shape_test('cropped', clf_ss, clf_sc, test_loader)
 print('accuracy:')
