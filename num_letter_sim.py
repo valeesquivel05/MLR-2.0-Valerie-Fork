@@ -7,11 +7,11 @@ import matplotlib.pyplot as plt
 from joblib import dump, load
 from torchvision import utils
 import torch.nn.functional as F
-
-load_checkpoint('output_emnist_recurr/checkpoint_300.pth')
-load_checkpoint_shapelabels('output_label_net/checkpoint_shapelabels5.pth')
-load_checkpoint_colorlabels('output_label_net/checkpoint_colorlabels10.pth')
-clf_shapeS=load('classifier_output/ss.joblib')
+v = '_v1' # which model version to use, set to '' for the most recent
+load_checkpoint(f'output_emnist_recurr{v}/checkpoint_300.pth')
+load_checkpoint_shapelabels(f'output_label_net{v}/checkpoint_shapelabels5.pth')
+#load_checkpoint_colorlabels(f'output_label_net{v}/checkpoint_colorlabels10.pth')
+clf_shapeS=load(f'classifier_output{v}/ss.joblib')
 
 vals = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
@@ -19,18 +19,19 @@ vals = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E
 
 vae.eval()
 with torch.no_grad():
-    num1 = 21 #1 # first char
-    num2 = 1 #3 # second char
+    num1 = 1#21#5#0#1#1#1#1#1 #1 # first char 21
+    num2 = 9#15#6#1#7#8#9#2#4 #3 # second char 1
+    x1, x2 = 0, 5 # locations for each img
     #colors = torch.randint(low=0, high=10, size=(2,))
 
     # build one hot vectors to be passed to the label networks
     num_labels = F.one_hot(torch.tensor([num1, num2]).cuda(), num_classes=s_classes).float().cuda() # shape
     loc_labels = torch.zeros((2,100)).cuda()
-    loc_labels[0][0], loc_labels[1][8] = 1, 1 # location
+    loc_labels[0][x1], loc_labels[1][x2] = 1, 1 # location
     #col_labels = F.one_hot(torch.tensor([num1, num2]).cuda(), num_classes=10).float().cuda()
 
     # generate shape latents from the labels n = noise
-    z_shape_labels = vae_shape_labels(num_labels, n = 1)
+    z_shape_labels = vae_shape_labels(num_labels, n = 10)
 
     # location latent from the location vector
     z_location = vae.location_encoder(loc_labels)
@@ -40,7 +41,8 @@ with torch.no_grad():
     # clamp shape recons to form one image of the combined numbers
     img1 = recon_retinal[0,:,:,6:34]
     img2 = recon_retinal[1,:,:,6:34]
-    comb_img = torch.clamp(img1 + img2, 0, 1)
+    #comb_img = torch.log((img1*255)+(img2*255)) * (1/9)
+    comb_img = torch.clamp(img1+img2, 0, 0.5) *1.5
     comb_img = comb_img.view(1,3,28,28)
 
     
