@@ -35,7 +35,6 @@ import sys
 import pandas as pd
 from torch.utils.data import DataLoader, Subset
 
-config.init()
 #from config import numcolors
 global numcolors, colorlabels
 from PIL import Image
