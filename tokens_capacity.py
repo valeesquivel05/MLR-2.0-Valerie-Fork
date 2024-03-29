@@ -42,15 +42,12 @@ from torch.autograd import Variable
 from torchvision.utils import save_image
 from sklearn import svm
 from sklearn.metrics import classification_report, confusion_matrix
-import config 
+ 
 from IPython.display import Image, display
 import cv2
 from PIL import ImageFilter
 import random
 
-config.init()
-
-from config import numcolors
 #global numcolors
 global colorlabels
 from PIL import Image
