@@ -60,7 +60,7 @@ if not os.path.exists(folder_path):
     os.mkdir(folder_path)
 
 #load_checkpoint('output/checkpoint_threeloss_singlegrad200_smfc.pth'.format(modelNumber=modelNumber))
-load_checkpoint('output_emnist_recurr1/checkpoint_300.pth') # MLR2.0 trained on emnist letters, digits, and fashion mnist
+load_checkpoint('output_emnist_recurr/checkpoint_300.pth') # MLR2.0 trained on emnist letters, digits, and fashion mnist
 
 #print('Loading the classifiers')
 clf_shapeS=load('classifier_output/ss.joblib')
@@ -97,7 +97,7 @@ hugepermnum=10000
 bigpermnum = 500
 smallpermnum = 100
 
-Fig2aFlag = 1       #binding pool reconstructions   NOTWORKING
+Fig2aFlag = 0       #binding pool reconstructions   NOTWORKING
 fig_new_loc = 0     # reconstruct retina images with digits in the location opposite of training
 fig_loc_compare = 1 # compare retina images with digits in the same location as training and opposite location  
 Fig2bFlag = 1        #novel objects stored and retrieved from memory, one at a time

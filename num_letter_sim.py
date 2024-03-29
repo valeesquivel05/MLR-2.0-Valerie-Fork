@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 from joblib import dump, load
 from torchvision import utils
 import torch.nn.functional as F
-v = '_v1' # which model version to use, set to '' for the most recent
+
+v = '' # which model version to use, set to '' for the most recent
 load_checkpoint(f'output_emnist_recurr{v}/checkpoint_300.pth')
 load_checkpoint_shapelabels(f'output_label_net{v}/checkpoint_shapelabels5.pth')
 #load_checkpoint_colorlabels(f'output_label_net{v}/checkpoint_colorlabels10.pth')
@@ -19,8 +20,8 @@ vals = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E
 
 vae.eval()
 with torch.no_grad():
-    num1 = 1#21#5#0#1#1#1#1#1 #1 # first char 21
-    num2 = 9#15#6#1#7#8#9#2#4 #3 # second char 1
+    num1 = 21#5#0#1#1#1#1#1 #1 # first char 21
+    num2 = 15#6#1#7#8#9#2#4 #3 # second char 1
     x1, x2 = 0, 5 # locations for each img
     #colors = torch.randint(low=0, high=10, size=(2,))
 
