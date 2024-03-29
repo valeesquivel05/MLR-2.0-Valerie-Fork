@@ -60,15 +60,6 @@ folder_path = f'output{modelNumber}' # the output folder for the trained model v
 if not os.path.exists(folder_path):
     os.mkdir(folder_path)
 
-# reload a saved file
-def load_checkpoint(fimport syslepath):
-    checkpoint = torch.load(filepath,device)
-    vae.load_state_dict(checkpoint['state_dict'])
-    for parameter in vae.parameters():
-        parameter.requires_grad = False
-    vae.eval()
-    return vae
-
 #load_checkpoint('output/checkpoint_threeloss_singlegrad200_smfc.pth'.format(modelNumber=modelNumber))
 load_checkpoint('output_emnist_recurr1/checkpoint_300.pth') # MLR2.0 trained on emnist letters, digits, and fashion mnist
 
