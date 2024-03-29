@@ -6,12 +6,15 @@ from sklearn.metrics import classification_report, confusion_matrix, accuracy_sc
 from torchvision import utils
 from mVAE import vae
 from PIL import Image, ImageOps, ImageEnhance, __version__ as PILLOW_VERSION
+import matplotlib.pyplot as plt
 
 # defining the classifiers
 clf_ss = svm.SVC(C=10, gamma='scale', kernel='rbf')  # define the classifier for shape
 clf_sc = svm.SVC(C=10, gamma='scale', kernel='rbf')  # classify shape map against color labels
 clf_cc = svm.SVC(C=10, gamma='scale', kernel='rbf')  # define the classifier for color
 clf_cs = svm.SVC(C=10, gamma='scale', kernel='rbf')  # classify color map against shape labels
+
+vals = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
 #training the shape map on shape labels and color labels
 def classifier_shape_train(whichdecode_use, train_dataset):
@@ -33,7 +36,7 @@ def classifier_shape_train(whichdecode_use, train_dataset):
         clf_ss.fit(z_shape.cpu().numpy(), train_shapelabels)
 
 #testing the shape classifier (one image at a time)
-def classifier_shape_test(whichdecode_use, clf_ss, clf_sc, test_dataset, verbose=0):
+def classifier_shape_test(whichdecode_use, clf_ss, clf_sc, test_dataset, confusion_mat=0):
     vae.eval()
     with torch.no_grad():
         data, labels = next(iter(test_dataset))
@@ -45,16 +48,22 @@ def classifier_shape_test(whichdecode_use, clf_ss, clf_sc, test_dataset, verbose
         pred_ss = clf_ss.predict(z_shape.cpu())
         pred_sc = clf_sc.predict(z_shape.cpu())
 
-        SSreport = accuracy_score(pred_ss,test_shapelabels.cpu().numpy())#torch.eq(test_shapelabels.cpu(), pred_ss).sum().float() / len(pred_ss)
+        test_shapelabels = test_shapelabels.cpu().numpy()
+
+        SSreport = accuracy_score(pred_ss,test_shapelabels)#torch.eq(test_shapelabels.cpu(), pred_ss).sum().float() / len(pred_ss)
         SCreport = accuracy_score(pred_sc,test_colorlabels.cpu().numpy())#torch.eq(test_colorlabels.cpu(), pred_sc).sum().float() / len(pred_sc)
 
-        if verbose ==1:
-            print('----*************---------shape classification from shape map')
-            print(confusion_matrix(test_shapelabels, pred_ss))
-            print(classification_report(test_shapelabels, pred_ss))
-            print('----************----------color classification from shape map')
-            print(confusion_matrix(test_colorlabels, pred_sc))
-            print(classification_report(test_colorlabels, pred_sc))
+        if confusion_mat == 1:
+            cm = confusion_matrix(test_shapelabels, pred_ss)
+            # Plot the confusion matrix
+            plt.imshow(cm, cmap="Greys")
+            plt.title("Confusion Matrix")
+            plt.xlabel("Predicted")
+            plt.ylabel("True")
+            plt.colorbar()
+            for i in range(0,36):
+                plt.annotate(f'{vals[i]}', (i,i), fontsize=10)
+            plt.show()
 
     return pred_ss, pred_sc, SSreport, SCreport
 
