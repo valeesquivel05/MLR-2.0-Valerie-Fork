@@ -26,7 +26,6 @@ from torch.autograd import Variable
 from torchvision.utils import save_image
 from sklearn import svm
 from sklearn.metrics import classification_report, confusion_matrix
-import config
 from IPython.display import Image, display
 import cv2
 from PIL import ImageFilter
@@ -62,7 +61,7 @@ if not os.path.exists(folder_path):
     os.mkdir(folder_path)
 
 # reload a saved file
-def load_checkpoint(filepath):
+def load_checkpoint(fimport syslepath):
     checkpoint = torch.load(filepath,device)
     vae.load_state_dict(checkpoint['state_dict'])
     for parameter in vae.parameters():
