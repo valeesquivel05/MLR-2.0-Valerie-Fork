@@ -8,6 +8,7 @@ from joblib import dump, load
 from torchvision import utils
 import torch.nn.functional as F
 import os
+from sklearn.metrics import accuracy_score
 
 v = '_v1' # which model version to use, set to '' for the most recent
 load_checkpoint(f'output_emnist_recurr{v}/checkpoint_300.pth') # load VAE
@@ -61,12 +62,14 @@ def letter_sim(char_1, char_2, l_1, l_2, noise = 1, save_img = False):
             utils.save_image(img1, f'{output_folder_path}/{char_1}.png')
             utils.save_image(img2, f'{output_folder_path}/{char_2}.png')
         
-    return out_pred # returns integer of predicted character
+    return out_pred # returns integer index of predicted character in the vals list
 
 # demo:
 # generates a 1 and a 3 at positions 0 and 7 respectively, a moderate amount of noise is added to the latent representations and the generated image is saved
 pred = letter_sim(char_1 = 1, char_2 = 3, l_1 = 0, l_2 = 7, noise = 140, save_img = True)
 print(vals[pred])
-
+# accuracy can be calculated using:
+# true_list = [correct_char] * len(prediction_list)
+# accuracy = accuracy_score(true_list, prediction_list)
 
 # Valerie:
