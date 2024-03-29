@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 import random
 from dataset_builder import dataset_builder
 from torch.utils.data import DataLoader, ConcatDataset
+from mpl_toolkits.mplot3d import Axes3D
+
+vals = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
 device ='cuda'
 def load_checkpoint(filepath):
@@ -16,7 +19,8 @@ def load_checkpoint(filepath):
     return vae
 modelNumber = 1
 v = '' #'_v1'
-load_checkpoint(f'output_emnist_recurr{v}/checkpoint_300.pth') # MLR2.0 trained on emnist letters, digits, and fashion mnist
+cur_dataset = 'emnist'
+'''load_checkpoint(f'output_emnist_recurr{v}/checkpoint_300.pth') # MLR2.0 trained on emnist letters, digits, and fashion mnist
 
 vae.eval()
 
@@ -29,7 +33,6 @@ mnist_dataset, mnist_skip, mnist_test_dataset = dataset_builder('mnist', bs, Non
 #concat datasets and init dataloaders
 train_loader = torch.utils.data.DataLoader(dataset=ConcatDataset([mnist_dataset]), batch_size=bs, shuffle=True,  drop_last= True)
 
-cur_dataset = 'mnist'
 
 torch.save([], f'{cur_dataset}rep.pt')
 
@@ -51,11 +54,11 @@ for data_tup in tqdm(train_loader):
 
 print('Samples done')
 
-torch.cuda.empty_cache()
+torch.cuda.empty_cache()'''
 
 data= torch.load(f'{cur_dataset}rep.pt')
 
-data = data[:3000]
+data = data [:3000]
 
 tensors = [item[0][0].cpu().detach().numpy() for item in data]
 tensors_array = np.array(tensors)
@@ -67,18 +70,16 @@ labels = [item[1] for item in data]
 unique_classes = list(set(labels))
 class_to_color = {cls: plt.cm.jet(i / len(unique_classes)) for i, cls in enumerate(unique_classes)}
 
-plt.figure(figsize=(10, 8))
+plt.figure()
 for i, cls in enumerate(unique_classes):
     class_indices = [j for j, label in enumerate(labels) if label == cls]
-    plt.scatter(embedded_data[class_indices, 0], embedded_data[class_indices, 1], 
-                label=f'Class {cls}', color=class_to_color[cls], marker='o')
+    plt.scatter(embedded_data[class_indices, 0], embedded_data[class_indices, 1],
+                label=f'Class {vals[cls]}', color=class_to_color[cls], marker='o')
 
+    repr_x_coord = sum(embedded_data[class_indices, 0]) / (len(embedded_data[class_indices, 0]))
+    repr_y_coord = sum(embedded_data[class_indices, 1]) / (len(embedded_data[class_indices, 1]))
     representative_index = class_indices[random.randint(min(unique_classes), max(unique_classes) + 1)] #
-    plt.annotate(f'{cls}', (embedded_data[representative_index, 0], embedded_data[representative_index, 1]), fontsize=20)
+    plt.annotate(f'{vals[cls]}', (embedded_data[representative_index, 0], embedded_data[representative_index, 1]), fontsize=20)
+
 plt.legend()
 plt.show()
-
-
-
-
-
