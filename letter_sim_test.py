@@ -29,7 +29,7 @@ if not os.path.exists(output_folder_path):
 def letter_sim(char_1, char_2, l_1, l_2, noise = 1, save_img = False):
     # char_1, char_2: type: integer, which characters to combine, corresponds to the index of the desired character in the vals list ie: 4=4, A=10, Z=35..
     # l_1, l_2: type: integer, the location of the first and second character respectively
-    # noise: type: float, scales the noise added into the latent representations
+    # noise: type: float, scales the noise added into the latent representations, set to 1 by default
     # save_img: type: boolean, whether to save the generated images to the output folder
     with torch.no_grad():
         # build one hot vectors to be passed to the label networks
@@ -55,6 +55,8 @@ def letter_sim(char_1, char_2, l_1, l_2, noise = 1, save_img = False):
 
         pred_ss = clf_shapeS.predict(z_shape.cpu())
         out_pred = pred_ss[0].item() # predicted character
+        pred_prob = clf_shapeS.predict_proba(z_shape.cpu())
+        out_prob = pred_prob[0][out_pred]
 
         if save_img == True:
             recon_shape = vae.decoder_shape(z_shape, 0, 0)
@@ -63,14 +65,15 @@ def letter_sim(char_1, char_2, l_1, l_2, noise = 1, save_img = False):
             utils.save_image(img1, f'{output_folder_path}/{char_1}.png')
             utils.save_image(img2, f'{output_folder_path}/{char_2}.png')
         
-    return out_pred # returns integer index of predicted character in the vals list
+    return out_pred, out_prob # returns integer index of predicted character in the vals list, estimated confidence using predict_proba
 
 # Valerie:
 
 # demo:
-# generates a 1 and a 3 at positions 0 and 7 respectively, a moderate amount of noise is added to the latent representations and the generated image is saved
-pred = letter_sim(char_1 = 1, char_2 = 3, l_1 = 0, l_2 = 7, noise = 140, save_img = True)
+# generates a 1 and a 3 at positions 0 and 7 respectively, no noise is added to the latent representations and the generated image is saved
+pred, prob = letter_sim(char_1 = 1, char_2 = 3, l_1 = 0, l_2 = 7, noise = 1, save_img = True)
 print(vals[pred])
+print(prob)
 # accuracy can be calculated using:
 # true_list = [correct_char] * len(prediction_list)
 # accuracy = accuracy_score(true_list, prediction_list)

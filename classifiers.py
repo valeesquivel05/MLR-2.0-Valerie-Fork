@@ -9,7 +9,7 @@ from PIL import Image, ImageOps, ImageEnhance, __version__ as PILLOW_VERSION
 import matplotlib.pyplot as plt
 
 # defining the classifiers
-clf_ss = svm.SVC(C=10, gamma='scale', kernel='rbf')  # define the classifier for shape
+clf_ss = svm.SVC(C=10, gamma='scale', kernel='rbf', probability= True)  # define the classifier for shape
 clf_sc = svm.SVC(C=10, gamma='scale', kernel='rbf')  # classify shape map against color labels
 clf_cc = svm.SVC(C=10, gamma='scale', kernel='rbf')  # define the classifier for color
 clf_cs = svm.SVC(C=10, gamma='scale', kernel='rbf')  # classify color map against shape labels
