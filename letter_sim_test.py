@@ -27,7 +27,7 @@ if not os.path.exists(output_folder_path):
     os.mkdir(output_folder_path)
 
 def letter_sim(char_1, char_2, l_1, l_2, noise = 1, save_img = False):
-    # char_1, char_2: type: integer, which digit or letters to combine together, corresponds to the index of the desired character in the vals list
+    # char_1, char_2: type: integer, which characters to combine, corresponds to the index of the desired character in the vals list ie: 4=4, A=10, Z=35..
     # l_1, l_2: type: integer, the location of the first and second character respectively
     # noise: type: float, scales the noise added into the latent representations
     # save_img: type: boolean, whether to save the generated images to the output folder
@@ -56,9 +56,8 @@ def letter_sim(char_1, char_2, l_1, l_2, noise = 1, save_img = False):
         pred_ss = clf_shapeS.predict(z_shape.cpu())
         out_pred = pred_ss[0].item() # predicted character
 
-        recon_shape = vae.decoder_shape(z_shape, 0, 0)
-
         if save_img == True:
+            recon_shape = vae.decoder_shape(z_shape, 0, 0)
             utils.save_image(comb_img, f'{output_folder_path}/{char_1}_{char_2}_sim.png')
             utils.save_image(recon_shape, f'{output_folder_path}/{char_1}_{char_2}_sim_recon.png')
             utils.save_image(img1, f'{output_folder_path}/{char_1}.png')
