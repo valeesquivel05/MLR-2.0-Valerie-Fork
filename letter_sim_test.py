@@ -9,8 +9,10 @@ from torchvision import utils
 import torch.nn.functional as F
 import os
 from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
 
-v = '_v1' # which model version to use, set to '' for the most recent
+# load VAE, label network, and classifiers:
+v = '' # which model version to use, set to '' for the most recent
 load_checkpoint(f'output_emnist_recurr{v}/checkpoint_300.pth') # load VAE
 load_checkpoint_shapelabels(f'output_label_net{v}/checkpoint_shapelabels5.pth') # load shape label net
 clf_shapeS = load(f'classifier_output{v}/ss.joblib')
@@ -64,6 +66,8 @@ def letter_sim(char_1, char_2, l_1, l_2, noise = 1, save_img = False):
         
     return out_pred # returns integer index of predicted character in the vals list
 
+# Valerie:
+
 # demo:
 # generates a 1 and a 3 at positions 0 and 7 respectively, a moderate amount of noise is added to the latent representations and the generated image is saved
 pred = letter_sim(char_1 = 1, char_2 = 3, l_1 = 0, l_2 = 7, noise = 140, save_img = True)
@@ -72,4 +76,6 @@ print(vals[pred])
 # true_list = [correct_char] * len(prediction_list)
 # accuracy = accuracy_score(true_list, prediction_list)
 
-# Valerie:
+# accuracy can be plotted with matplotlib:
+# plt.plot(accuracy_list)
+# plt.show()
