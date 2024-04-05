@@ -71,9 +71,9 @@ def letter_sim(char_1, char_2, l_1, l_2, noise = 1, save_img = False):
 
 # demo:
 # generates a 1 and a 3 at positions 0 and 7 respectively, no noise is added to the latent representations and the generated image is saved
-pred, prob = letter_sim(char_1 = 1, char_2 = 3, l_1 = 0, l_2 = 7, noise = 1, save_img = True)
-print(vals[pred])
-print(prob)
+# pred, prob = letter_sim(char_1 = 1, char_2 = 3, l_1 = 0, l_2 = 7, noise = 1, save_img = True)
+# print(vals[pred])
+# print(prob)
 # accuracy can be calculated using:
 # true_list = [correct_char] * len(prediction_list)
 # accuracy = accuracy_score(true_list, prediction_list)
