@@ -83,38 +83,65 @@ def letter_sim(char_1, char_2, l_1, l_2, noise = 1, save_img = False):
 # plt.show()
 
 
-# initialize lists to store accuracy and confidence 
+# testing this out lolz >.<
+# initialize lists to score accuracy and confidence 
 accuracy_list = []
 confidence_list = []
+# define the correct character 
+correct_char = ‘A’
 
-# define the correct character (i feel like i dont actually have to have this here but just in case)
-correct_char = 'A'
+# iterate over different location pairs 
+for l_1 in range(10):
+    for l_2 in range(10): 
 
-# iterate over different location paits
-for l_1 in range(10): 
-    for l_2 in range(10):
-        char_1 = 'A'
-        char_2 = 'B'
+        # call letter_sim
+        pred, prob = letter_sim(char_1 = 1, char_2 = 3, l_1 = l_1, l_2 = l_2, noise=1, save_img = True)
 
-        #call letter_sim 
-        pred, prob = letter_sim(char_1 = 1, char_2 = 2, l_1 = 0, l_2 = 7, noise = 1, save_img=True)
-
-        # calulate accuracy 
-        true_list = [correct_char] * 100 
+        # calculate accuracy 
+        true_list = [correct_char] * 100
         accuracy = accuracy_score(true_list, [pred] * 100)
 
         # print prediction and confidence
-        print(vals[pred])
-        print(prob)
+        print(f"Prediction for location pair ({l_1}, {l_2}): {vals[pred]}")
+        print(f"Confidence: {prob}")
 
-        #store accuracy and confidence 
+        # store accuracy and confidence 
         accuracy_list.append(accuracy)
         confidence_list.append(prob)
 
-# plot accuracy 
-plt.plot(accuracy_list)
-plt.show()
+# add another loop to test each character 100 times 
+for char_num in range (10):
+# for in range (100):
 
+        # call letter sim for each character
+        pred, prob = letter_sim(char_1=char_num, char_2=char_num, l_1 = 0, l_2 = 7, noise=1, saveimg=True)
+        
+        # calculate accuracy
+        true_list = [correct char] * 100
+        accuracy = accuracy_score (true_list, [pred] * 100)
+        
+        # print prediction and confidence
+        print(f"Prediction for location pair ({l_1}, {l_2}): {vals[pred]}")
+        print (f"Confidence: {prob}")
+        
+        # store accuracy and confidence
+        accuracy_list.append(accuracy)
+        confidence_list.append(prob)
+        
+# calculate the average accuracy and confidence
+average_accuracy = sum(accuracy_list) / len (accuracy_list)
+average_confidence = sum(confidence_list) / len(confidence_list)
+        
+# plot accuracy
+plt.plot(accuracy list) 
+plt.xlabel("Iteration") 
+plt.ylabel("Accuracy")
+plt.title("Accuracy vs. Iteration")
+plt.show()
+       
 # plot confidence
-plt.plot(confidence_list)
+plt.plot(confidence_list) 
+plt.xlabel("Iteration") 
+plt.ylabel("Confidence")
+plt.title("Confidence vs. Iteration" )
 plt.show()
