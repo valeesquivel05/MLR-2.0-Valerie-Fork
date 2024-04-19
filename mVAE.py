@@ -176,7 +176,7 @@ class VAE_CNN(nn.Module):
 
         # map scalars
         self.shape_scale = 1.9
-        self.color_scale = 2
+        self.color_scale = 1.8
 
     def encoder(self, x, l):
         h = self.relu(self.bn1(self.conv1(x)))
